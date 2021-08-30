@@ -1,2 +1,5 @@
 server/dist
-server/node_module
+server/node_modules
+server/.env
+server/.env.example
+server/package-lock.json
