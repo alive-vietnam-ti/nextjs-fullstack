@@ -4,6 +4,10 @@ import express from 'express'
 import { createConnection } from 'typeorm'
 import { User } from './entities/User'
 import { Post } from './entities/Post'
+import { ApolloServer } from 'apollo-server-express'
+import { buildSchema } from 'type-graphql'
+import { HelloResolver } from './resolvers/hello'
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
 
 const main = async () => {
   await createConnection({
@@ -17,8 +21,19 @@ const main = async () => {
   })
   const app = express();
 
-  app.listen(4000, () => {
-    console.log(`server started on port 4000`);
+  const apolloServer = new ApolloServer({
+    schema: await buildSchema({ resolvers: [HelloResolver], validate: false }),
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()]
+    // context: ({ req, res }): Context => ({ req, res })
+  })
+
+  await apolloServer.start()
+
+  apolloServer.applyMiddleware({ app, cors: false })
+
+  const PORT = process.env.PORT || 4000
+  app.listen(PORT, () => {
+    console.log(`server started on port ${PORT}. GraphQL server started on localhost: ${PORT}${apolloServer.graphqlPath}`);
 
   })
 }
